@@ -4,7 +4,7 @@ Our aim is purely educational although we strive for elegance and correctness.
 
 The following data structures are currently provided:
 - Graphs
-- [BitArrays](https://github.com/massimo-nocentini/dsst/wiki/BitArrays)
+- [BitArrays](/BitArrays.md)
 - Heaps
    - [Leftist](https://github.com/massimo-nocentini/dsst/wiki/Leftist-Heaps)
    - [Binomial](https://github.com/massimo-nocentini/dsst/wiki/Binomial-Heaps)
