@@ -10,3 +10,6 @@ The following data structures are currently provided:
    - [Binomial](https://github.com/massimo-nocentini/dsst/wiki/Binomial-Heaps)
 - [Skew Binary (Canonical) Numbers](https://github.com/massimo-nocentini/dsst/wiki/Skew-Binary-Numbers)
    - [Skew Binary Random Access Lists (SBRALs)](https://github.com/massimo-nocentini/dsst/wiki/Skew-Binary-Random-Access-Lists-(SBRALs))
+
+
+This is just a simple test to see if math works properly $$ 2 + x^2 = 11 $$.
