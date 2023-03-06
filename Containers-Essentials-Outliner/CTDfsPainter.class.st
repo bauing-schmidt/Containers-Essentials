@@ -12,7 +12,8 @@ Class {
 		'shapes',
 		'edges',
 		'dfsWalker',
-		'layout'
+		'layout',
+		'skipBoxes'
 	],
 	#category : #'Containers-Essentials-Outliner-Painters'
 }
@@ -43,7 +44,7 @@ CTDfsPainter >> backLinesBuilder [
 { #category : #'line drawing' }
 CTDfsPainter >> backTuples: backTuples lineBuilder: lineBuilder [
 
-	^ backTuples collect: [ :aTuple | 
+	^ backTuples collect: [ :aTuple |
 		  self edgeForTuple: aTuple lineBuilder: lineBuilder ]
 ]
 
@@ -73,7 +74,7 @@ CTDfsPainter >> crossLinesBuilder [
 { #category : #'line drawing' }
 CTDfsPainter >> crossTuples: crossTuples lineBuilder: lineBuilder [
 
-	^ crossTuples collect: [ :aTuple | 
+	^ crossTuples collect: [ :aTuple |
 		  self edgeForTuple: aTuple lineBuilder: lineBuilder ]
 ]
 
@@ -120,30 +121,32 @@ CTDfsPainter >> edgeForTuple: aTuple lineBuilder: lineBuilder [
 { #category : #iterating }
 CTDfsPainter >> forbiddenShapes: forbiddenShapes withDfsEdgesDo: recvBlock [
 
-	| sortedFromShapes treeAssociations forwardAssociations backAssociations crossAssociations |
+	| sortedFromShapes treeAssociations forwardAssociations backAssociations crossAssociations postAssociations |
 	treeAssociations := OrderedCollection new.
 	forwardAssociations := OrderedCollection new.
 	backAssociations := OrderedCollection new.
 	crossAssociations := OrderedCollection new.
+	postAssociations := OrderedCollection new.
 
-	sortedFromShapes := fromShapes associations sorted: [ 
-		                    :anAssoc 
-		                    :anotherAssoc | 
+	sortedFromShapes := fromShapes associations sorted: [
+		                    :anAssoc
+		                    :anotherAssoc |
 		                    | aTime anotherTime |
 		                    aTime := (toShapes at: anAssoc key model)
 			                             propertyDfsEntryTime.
+
 		                    anotherTime := (toShapes at:
 			                                    anotherAssoc key model)
 			                                   propertyDfsEntryTime.
+
 		                    aTime < anotherTime ].
 
-	sortedFromShapes withIndexDo: [ :anAssociation :index | 
-		| value boxShape fromShape manyShapes tuple tuples isOneToMany toShape |
+	sortedFromShapes withIndexDo: [ :anAssociation :index |
+		| value boxShape fromShape manyShapes tuple tuples isOneToMany |
 		boxShape := anAssociation key.
 		fromShape := anAssociation value.
 
 		value := boxShape model.
-		toShape := toShapes at: value.
 
 		boxShape
 			propertyAt: #isGhostShape
@@ -151,15 +154,15 @@ CTDfsPainter >> forbiddenShapes: forbiddenShapes withDfsEdgesDo: recvBlock [
 
 		oneToManyShapes
 			at: value
-			ifPresent: [ :someShapes | 
+			ifPresent: [ :someShapes |
 				forbiddenShapes add: (toShapes at: value).
 				isOneToMany := true.
 				manyShapes := someShapes ]
-			ifAbsent: [ 
+			ifAbsent: [
 				isOneToMany := false.
 				manyShapes := Array with: (toShapes at: value) ].
 
-		manyShapes do: [ :aShape | 
+		manyShapes do: [ :aShape |
 			tuple := Array
 				         with: index
 				         with: boxShape
@@ -170,20 +173,25 @@ CTDfsPainter >> forbiddenShapes: forbiddenShapes withDfsEdgesDo: recvBlock [
 				          fromShape: fromShape
 				          toShape: aShape
 				          ifTree: [ treeAssociations ]
-				          ifForward: [ 
+				          ifForward: [
 					          isOneToMany
 						          ifTrue: [ treeAssociations ]
 						          ifFalse: [ forwardAssociations ] ]
-				          ifBack: [ backAssociations ]
-				          ifCross: [ crossAssociations ].
+				          ifBack: [
+					isOneToMany
+						          ifTrue: [ backAssociations ]
+						          ifFalse: [ OrderedCollection new ]  ]
+				          ifCross: [ crossAssociations ]
+				          ifPost: [ postAssociations ].
 
 			(forbiddenShapes includes: fromShape) ifFalse: [ tuples add: tuple ] ] ].
 
-	^ recvBlock
-		  value: treeAssociations
-		  value: forwardAssociations
-		  value: backAssociations
-		  value: crossAssociations
+	^ recvBlock valueWithArguments: {
+			  treeAssociations.
+			  forwardAssociations.
+			  backAssociations.
+			  crossAssociations.
+			  postAssociations }
 ]
 
 { #category : #'line building' }
@@ -216,39 +224,45 @@ CTDfsPainter >> forwardTuples: forwardTuples lineBuilder: lineBuilder [
 ]
 
 { #category : #mapping }
-CTDfsPainter >> fromShape: fromShape toShape: toShape ifTree: tBlock ifForward: fBlock ifBack: bBlock ifCross: cBlock [
+CTDfsPainter >> fromShape: fromShape toShape: toShape ifTree: tBlock ifForward: fBlock ifBack: bBlock ifCross: cBlock ifPost: pBlock [
 
 	^ fromShape == toShape
 		  ifTrue: bBlock
-		  ifFalse: [ 
+		  ifFalse: [
 			  | fromEntryTime toEntryTime fromLeaveTime toLeaveTime |
 			  fromEntryTime := fromShape propertyDfsEntryTime.
 			  toEntryTime := toShape propertyDfsEntryTime.
 			  fromLeaveTime := fromShape propertyDfsLeaveTime.
 			  toLeaveTime := toShape propertyDfsLeaveTime.
 
-			  (fromEntryTime < toEntryTime and: [ 
+			  (fromEntryTime < toEntryTime and: [
 				   toShape propertyDfsLeaveTime < fromLeaveTime ])
-				  ifTrue: [ 
+				  ifTrue: [
 					  toShape propertyDfsDepth - fromShape propertyDfsDepth = 1
 						  ifTrue: tBlock
 						  ifFalse: fBlock ]
-				  ifFalse: [ 
-					  (toEntryTime < fromEntryTime and: [ 
+				  ifFalse: [
+					  (toEntryTime < fromEntryTime and: [
 						   fromLeaveTime < toLeaveTime ])
 						  ifTrue: bBlock
-						  ifFalse: [ 
+						  ifFalse: [
 							  toLeaveTime < fromEntryTime
 								  ifTrue: cBlock
-								  ifFalse: [ 
-									  Error signal:
-										  'Logical inconsistency: a non-sense association has been recognized.' ] ] ] ]
+								  ifFalse: pBlock ] ] ]
+]
+
+{ #category : #initialization }
+CTDfsPainter >> initialize [
+
+	super initialize.
+
+	skipBoxes := IdentitySet new
 ]
 
 { #category : #layouting }
 CTDfsPainter >> layout [
 
-	^ RSHorizontalWithPyramidalWidthsVanDerPloegTreeLayout new
+	^ RSHorizontalWithChildrenSizeDepthsVanDerPloegTreeLayout new
 ]
 
 { #category : #'line building' }
@@ -288,6 +302,95 @@ CTDfsPainter >> layoutTuples: treeTuples lineBuilder: lineBuilder [
 CTDfsPainter >> newTreeLine [
 
 	^ RSLineBuilder horizontalDeCasteljauSegmentedLine "Or horizontalSegmentedBezierLine"
+]
+
+{ #category : #'line building' }
+CTDfsPainter >> postLinesBuilder [
+
+	| color |
+	color := Color gray lighter lighter lighter.
+	^ RSLineBuilder bezier
+		  markerEnd: (RSMarker new
+				   shape: (RSShapeFactory arrow
+						    size: Float goldenRatio * 5;
+						    color: color;
+						    cornerRadii: Float goldenRatio;
+						    yourself);
+				   offset: Float goldenRatio double;
+				   yourself);
+		  color: color lighter;
+		  dashArray: { (4 * Float silverRatio) };
+		  controlPointsController: (RSStartEndCPAPController new
+				   controller: RSDirectedBezierConcavityCPAPController new;
+				   startAttachPoint: RSCenteredAttachPoint new;
+				   endAttachPoint: RSTopEndVerticalAttachPoint new);
+		  yourself
+]
+
+{ #category : #'line building' }
+CTDfsPainter >> postSharingLinesBuilder [
+
+	| color |
+	color := Color gray lighter lighter lighter.
+	^ RSLineBuilder bezier
+		  "markerEnd: (RSMarker new
+				   shape: (RSShapeFactory arrow
+						    size: Float goldenRatio * 5;
+						    color: color;
+						    cornerRadii: Float goldenRatio;
+						    yourself);
+				   offset: Float goldenRatio double;
+				   yourself);"
+		  color: color lighter;
+		  dashArray: { (4 * Float silverRatio) };
+		  controlPointsController: (RSStartEndCPAPController new
+				   controller: RSDirectedBezierCPAPController new;
+				   startAttachPoint: RSCenteredAttachPoint new;
+				   endAttachPoint: RSCenteredAttachPoint new);
+		  yourself
+]
+
+{ #category : #'line drawing' }
+CTDfsPainter >> postTuples: postTuples lineBuilder: lineBuilder [
+
+	| lines |
+	lines := OrderedCollection new.
+
+	postTuples do: [ :aTuple | 
+		dfsWalker postponedObjects
+			at: aTuple second
+			ifPresent: [ :anAssoc | 
+				| toShape boxes toObject parent toBox newTuple |
+				parent := anAssoc key.
+				toObject := anAssoc value.
+
+				toShape := toShapes at: toObject.
+				boxes := (toShape propertyAt: #dfsWalkerData) rows collect: #box.
+
+				toBox := boxes
+					         detect: [ :each | each model == parent ]
+					         ifNone: [ nil ].
+
+				toBox ifNotNil: [ 
+					| l |
+					skipBoxes add: toBox.
+
+					newTuple := aTuple copy
+						            at: 4 put: toBox;
+						            yourself.
+
+					l := self
+						     edgeForTuple: newTuple
+						     lineBuilder: self postSharingLinesBuilder.
+
+					lines add: l ] ]
+			ifAbsent: [ 
+				| l |
+				l := self edgeForTuple: aTuple lineBuilder: lineBuilder.
+
+				lines add: l ] ].
+
+	^ lines
 ]
 
 { #category : #'line building' }
@@ -331,7 +434,12 @@ CTDfsPainter >> value: anObject [
 
 	self
 		forbiddenShapes: forbiddenShapes
-		withDfsEdgesDo: [ :treeTuples :forwardTuples :backTuples :crossTuples | 
+		withDfsEdgesDo: [
+			:treeTuples
+			:forwardTuples
+			:backTuples
+			:crossTuples
+			:postTuples |
 			edges
 				addAll:
 					(self treeTuples: treeTuples lineBuilder: self treeLinesBuilder);
@@ -343,13 +451,16 @@ CTDfsPainter >> value: anObject [
 				addAll:
 					(self
 						 crossTuples: crossTuples
-						 lineBuilder: self crossLinesBuilder).
+						 lineBuilder: self crossLinesBuilder);
+				addAll:
+					(self postTuples: postTuples lineBuilder: self postLinesBuilder).
 
 			edgesForLayout := self
 				                  layoutTuples: treeTuples
 				                  lineBuilder: self layoutLinesBuilder ].
 
 	shapes := shapes reject: [ :each | forbiddenShapes includes: each ].
+	edges := edges reject: [ :each | skipBoxes includes: each from ].
 
 	self layoutOn: shapes edges: edgesForLayout.
 

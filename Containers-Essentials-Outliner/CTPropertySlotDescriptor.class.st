@@ -26,6 +26,12 @@ CTPropertySlotDescriptor >> addPopupInteractionOnShape: aShape [
 ]
 
 { #category : #accessing }
+CTPropertySlotDescriptor >> dispatchPostponed: child data: data walker: walker otherwise: oBlock [
+
+	self subclassResponsibility
+]
+
+{ #category : #accessing }
 CTPropertySlotDescriptor >> enabled [
 
 	self subclassResponsibility
@@ -80,6 +86,15 @@ CTPropertySlotDescriptor >> noHeader [
 ]
 
 { #category : #accessing }
+CTPropertySlotDescriptor >> postpone: anObject [
+
+	^ CTPostponeSlotDescriptor new
+		  descriptor: self;
+		  post: anObject;
+		  yourself
+]
+
+{ #category : #accessing }
 CTPropertySlotDescriptor >> quote [
 
 	^ self quote: [ :aShape :aDfsWalker | aShape ]
@@ -114,19 +129,19 @@ CTPropertySlotDescriptor >> selector [
 ]
 
 { #category : #accessing }
-CTPropertySlotDescriptor >> shape: anObject walker: aDfsWalker [
-
-	self subclassResponsibility
-]
-
-{ #category : #accessing }
 CTPropertySlotDescriptor >> valueOn: anObject walker: aDfsWalker [
 
 	self subclassResponsibility
 ]
 
 { #category : #accessing }
-CTPropertySlotDescriptor >> varLabelShapeOf: anObject shapeBuilder: aShapeBuilder [
+CTPropertySlotDescriptor >> valueShapeOf: anObject walker: aDfsWalker [
+
+	self subclassResponsibility
+]
+
+{ #category : #accessing }
+CTPropertySlotDescriptor >> varShapeOf: anObject walker: walker [
 
 	self subclassResponsibility
 ]
