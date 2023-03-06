@@ -177,7 +177,10 @@ CTDfsPainter >> forbiddenShapes: forbiddenShapes withDfsEdgesDo: recvBlock [
 					          isOneToMany
 						          ifTrue: [ treeAssociations ]
 						          ifFalse: [ forwardAssociations ] ]
-				          ifBack: [ backAssociations ]
+				          ifBack: [
+					isOneToMany
+						          ifTrue: [ backAssociations ]
+						          ifFalse: [ OrderedCollection new ]  ]
 				          ifCross: [ crossAssociations ]
 				          ifPost: [ postAssociations ].
 
@@ -259,7 +262,7 @@ CTDfsPainter >> initialize [
 { #category : #layouting }
 CTDfsPainter >> layout [
 
-	^ RSHorizontalWithPyramidalWidthsVanDerPloegTreeLayout new
+	^ RSHorizontalWithChildrenSizeDepthsVanDerPloegTreeLayout new
 ]
 
 { #category : #'line building' }
