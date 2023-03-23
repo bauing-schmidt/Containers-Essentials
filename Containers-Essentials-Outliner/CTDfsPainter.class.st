@@ -290,15 +290,13 @@ CTDfsPainter >> postTuples: postTuples lineBuilder: lineBuilder [
 				  skipBoxes add: toBox.
 
 				  newTuple := aTuple copy
-					  at: 4 put: toBox;
-					  yourself.
+					              at: 4 put: toBox;
+					              yourself.
 
 				  self
 					  edgeForTuple: newTuple
-					  lineBuilder: self postSharingLinesBuilder
-			  ]
-			  ifAbsent: [ self edgeForTuple: aTuple lineBuilder: lineBuilder ]
-	  ]
+					  lineBuilder: self postSharingLinesBuilder ]
+			  ifAbsent: [ self edgeForTuple: aTuple lineBuilder: lineBuilder ] ]
 ]
 
 { #category : #iterating }
