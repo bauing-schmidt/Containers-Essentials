@@ -274,44 +274,31 @@ CTDfsPainter >> postSharingLinesBuilder [
 { #category : #'line drawing' }
 CTDfsPainter >> postTuples: postTuples lineBuilder: lineBuilder [
 
-	| lines |
-	lines := OrderedCollection new.
+	^ postTuples collect: [ :aTuple |
+		  dfsWalker postponedObjects
+			  at: aTuple second
+			  ifPresent: [ :anAssoc |
+				  | toShape boxes toObject parent toBox newTuple |
+				  parent := anAssoc key.
+				  toObject := anAssoc value.
 
-	postTuples do: [ :aTuple | 
-		dfsWalker postponedObjects
-			at: aTuple second
-			ifPresent: [ :anAssoc | 
-				| toShape boxes toObject parent toBox newTuple |
-				parent := anAssoc key.
-				toObject := anAssoc value.
+				  toShape := toShapes at: toObject.
+				  boxes := toShape propertyDfsWalkingData rows collect: #box.
 
-				toShape := toShapes at: toObject.
-				boxes := (toShape propertyAt: #dfsWalkerData) rows collect: #box.
+				  toBox := boxes detect: [ :each | each model == parent ].
 
-				toBox := boxes
-					         detect: [ :each | each model == parent ]
-					         ifNone: [ nil ].
+				  skipBoxes add: toBox.
 
-				toBox ifNotNil: [ 
-					| l |
-					skipBoxes add: toBox.
+				  newTuple := aTuple copy
+					  at: 4 put: toBox;
+					  yourself.
 
-					newTuple := aTuple copy
-						            at: 4 put: toBox;
-						            yourself.
-
-					l := self
-						     edgeForTuple: newTuple
-						     lineBuilder: self postSharingLinesBuilder.
-
-					lines add: l ] ]
-			ifAbsent: [ 
-				| l |
-				l := self edgeForTuple: aTuple lineBuilder: lineBuilder.
-
-				lines add: l ] ].
-
-	^ lines
+				  self
+					  edgeForTuple: newTuple
+					  lineBuilder: self postSharingLinesBuilder
+			  ]
+			  ifAbsent: [ self edgeForTuple: aTuple lineBuilder: lineBuilder ]
+	  ]
 ]
 
 { #category : #iterating }
