@@ -24,6 +24,17 @@ BaselineOfContainersEssentials >> baseline: spec [
 ]
 
 { #category : #baselines }
+BaselineOfContainersEssentials >> common: spec [
+
+	spec
+		package: 'Containers-Essentials';
+		package: 'Containers-Essentials-Roassal';
+		package: 'Containers-Essentials-Outliner';
+		package: 'Containers-Essentials-Visualizations';
+		package: 'Containers-Essentials-Tests'
+]
+
+{ #category : #baselines }
 BaselineOfContainersEssentials >> ownPackages: spec [
 
 	spec
@@ -32,6 +43,14 @@ BaselineOfContainersEssentials >> ownPackages: spec [
 		package: 'Containers-Essentials-Outliner';
 		package: 'Containers-Essentials-Visualizations';
 		package: 'Containers-Essentials-Tests'
+]
+
+{ #category : #baselines }
+BaselineOfContainersEssentials >> pango: spec [
+
+	spec
+		baseline: 'Pango'
+		with: [ spec repository: 'github://massimo-nocentini/pharo-pango' ]
 ]
 
 { #category : #baselines }

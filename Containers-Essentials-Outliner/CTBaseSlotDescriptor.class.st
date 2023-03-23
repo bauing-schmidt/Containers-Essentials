@@ -6,10 +6,10 @@ Class {
 	#superclass : #CTPropertySlotDescriptor,
 	#instVars : [
 		'selector',
-		'inline',
 		'header',
 		'isOneToMany',
-		'enablePredicate'
+		'enablePredicate',
+		'inlinePredicate'
 	],
 	#category : #'Containers-Essentials-Outliner-Slots'
 }
@@ -48,7 +48,7 @@ CTBaseSlotDescriptor >> addPopupInteractionOnShape: aShape [
 					 nextPutAll: aShape propertyDfsSCC size asString ] ])
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #dispatching }
 CTBaseSlotDescriptor >> dispatchPostponed: child data: data walker: walker otherwise: oBlock [
 
 	^ oBlock value
@@ -58,12 +58,6 @@ CTBaseSlotDescriptor >> dispatchPostponed: child data: data walker: walker other
 CTBaseSlotDescriptor >> enablePredicate: aBlock [
 
 	enablePredicate := aBlock
-]
-
-{ #category : #accessing }
-CTBaseSlotDescriptor >> enabled [
-
-	^ enablePredicate value
 ]
 
 { #category : #accessing }
@@ -105,31 +99,42 @@ CTBaseSlotDescriptor >> initialize [
 
 	super initialize.
 
-	inline := [ :anObject :level :default | default ].
-
 	self
 		oneToOne;
 		headerWithAllSuperclasses;
-		enablePredicate: [ true ];
+		inlinePredicate: [ :level :default | default ];
+		enablePredicate: [ :level | true ];
 		postpone: false
 ]
 
 { #category : #dispatching }
 CTBaseSlotDescriptor >> inline [
 
-	inline := [ :anObject :level :default | true ]
+	self inlinePredicate: [ :level :default | true ]
 ]
 
 { #category : #accessing }
 CTBaseSlotDescriptor >> inline: anObject level: level default: aBoolean [
 
-	^ inline value: anObject value: level value: aBoolean
+	^ inlinePredicate value: level value: aBoolean
+]
+
+{ #category : #accessing }
+CTBaseSlotDescriptor >> inlinePredicate: anObject [
+
+	inlinePredicate := anObject
 ]
 
 { #category : #testing }
-CTBaseSlotDescriptor >> isOneToMany: anObject walker: aDfsWalker [
+CTBaseSlotDescriptor >> isEnabledAtLevel: l [
 
-	isOneToMany ifTrue: [ aDfsWalker oneToMany: anObject ]
+	^ enablePredicate value: l
+]
+
+{ #category : #accessing }
+CTBaseSlotDescriptor >> isOneToMany [
+
+	^ isOneToMany
 ]
 
 { #category : #initialization }
@@ -144,7 +149,7 @@ CTBaseSlotDescriptor >> noHeader [
 { #category : #dispatching }
 CTBaseSlotDescriptor >> noInline [
 
-	inline := [ :anObject :level :default | false ]
+	self inlinePredicate: [ :level :default | false ]
 ]
 
 { #category : #accessing }

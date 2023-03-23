@@ -32,12 +32,6 @@ CTPropertySlotDescriptor >> dispatchPostponed: child data: data walker: walker o
 ]
 
 { #category : #accessing }
-CTPropertySlotDescriptor >> enabled [
-
-	self subclassResponsibility
-]
-
-{ #category : #accessing }
 CTPropertySlotDescriptor >> header: aBlock [
 
 	self subclassResponsibility
@@ -74,7 +68,13 @@ CTPropertySlotDescriptor >> inline: anObject level: anInteger default: aBoolean 
 ]
 
 { #category : #testing }
-CTPropertySlotDescriptor >> isOneToMany: anObject walker: aDfsWalker [
+CTPropertySlotDescriptor >> isEnabledAtLevel: l [
+
+	self subclassResponsibility
+]
+
+{ #category : #testing }
+CTPropertySlotDescriptor >> isOneToMany [
 
 	self subclassResponsibility
 ]

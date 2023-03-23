@@ -593,11 +593,62 @@ EssentialsObjectTest >> testInspectObjectModel [
 EssentialsObjectTest >> testInspectOneToMany [
 
 	^ self
-		  exportSlotsGraphOf: { 'hello'. 'world' } ~~> ({ 
+		  exportSlotsGraphOf: {
+				  (LookupKey new
+					   key: 'hello';
+					   yourself).
+				  (LookupKey new
+					   key: 'world';
+					   yourself) } ~~> ({
 				   42 asValueHolder.
 				   Float goldenRatio asValueHolder } ~~> nil)
 		  slotDescriptorsVisitor:
 		  CTEssentialsOneToManyValueLinksSlotDescriptorsVisitor new
+]
+
+{ #category : #tests }
+EssentialsObjectTest >> testInspectOneToManyWithBackwardEdges [
+
+	| obj collection |
+	collection := OrderedCollection new.
+
+	obj := LookupKey new.
+
+	obj key: {
+			3.
+			(CTDummyForOneToMany new
+				 collection: {
+						 42 asValueHolder.
+						 Object new.
+						 obj };
+				 yourself) }.
+
+
+	^ self
+		  exportSlotsGraphOf: obj
+		  slotDescriptorsVisitor:
+		  CTEssentialsOneToManyValueLinksSlotDescriptorsVisitor new
+]
+
+{ #category : #tests }
+EssentialsObjectTest >> testInspectOneToOneWithBackwardEdges [
+
+	| obj collection |
+	collection := OrderedCollection new.
+
+	obj := LookupKey new.
+
+	obj key: {
+			3.
+			(CTDummyForOneToMany new
+				 collection: {
+						 42 asValueHolder.
+						 Object new.
+						 obj };
+				 yourself) }.
+
+
+	^ self exportSlotsGraphOf: obj
 ]
 
 { #category : #tests }

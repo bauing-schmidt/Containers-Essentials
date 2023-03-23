@@ -45,12 +45,6 @@ CTDecorateSlotDescriptor >> dispatchPostponed: child data: data walker: walker o
 ]
 
 { #category : #delegating }
-CTDecorateSlotDescriptor >> enabled [
-
-	^ descriptor enabled
-]
-
-{ #category : #delegating }
 CTDecorateSlotDescriptor >> header: aBlock [
 
 	descriptor header: aBlock
@@ -86,10 +80,16 @@ CTDecorateSlotDescriptor >> inline: anObject level: anInteger default: aBoolean 
 	^ descriptor inline: anObject level: anInteger default: aBoolean
 ]
 
-{ #category : #delegating }
-CTDecorateSlotDescriptor >> isOneToMany: anObject walker: aDfsWalker [
+{ #category : #testing }
+CTDecorateSlotDescriptor >> isEnabledAtLevel: l [
 
-	^ descriptor isOneToMany: anObject walker: aDfsWalker
+	^ descriptor isEnabledAtLevel: l
+]
+
+{ #category : #testing }
+CTDecorateSlotDescriptor >> isOneToMany [
+
+	^ descriptor isOneToMany
 ]
 
 { #category : #delegating }
