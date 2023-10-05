@@ -60,7 +60,7 @@ BaselineOfContainersEssentials >> roassal: spec [
 
 		baseline: 'Roassal3'
 		with: [ 
-		spec repository: 'github://bauing-schmidt/Roassal3:production12' ]
+		spec repository: 'github://bauing-schmidt/Roassal3:production11' ]
 ]
 
 { #category : #baselines }
