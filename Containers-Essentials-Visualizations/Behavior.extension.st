@@ -54,7 +54,8 @@ Behavior >> asShapeSubclasses [
 			           aShape := RSLabel new
 				                     text: aSubClass name;
 				                     when: RSMouseLeftClick
-				                     do: [ :ev | aSubClass browse ];
+				                     do: [ :ev | aSubClass browse ] for: self
+;
 				                     yourself.
 
 			           aShape := (aShape notedWithPad:

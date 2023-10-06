@@ -213,7 +213,7 @@ CTDfsShapeBuilder >> label: anObject var: var [
 
 			composite addInteraction: popup ].
 
-		composite when: RSMouseLeftClick do: [ :ev | cm browse ] ].
+		composite when: RSMouseLeftClick do: [ :ev | cm browse ]  for: self].
 
 	^ composite
 ]
@@ -225,7 +225,7 @@ CTDfsShapeBuilder >> labelForClass: aClass [
 		  text: aClass name;
 		  fontSize: metaFontSize;
 		  color: metaColor;
-		  when: RSMouseLeftClick do: [ :ev | aClass browse ];
+		  when: RSMouseLeftClick do: [ :ev | aClass browse ] for: self;
 		  yourself: [ :labelShape | 
 			  aClass hasAbstractMethods ifTrue: [ labelShape italic ] ]
 ]
